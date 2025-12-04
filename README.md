@@ -15,6 +15,10 @@ We address **How to create a poster from a paper** and **How to evaluate poster.
 ![Overview](./assets/overall.png)
 
 
+## 🤩 Paper2Poster for Paper2Poster
+
+![Overview](./assets/teaser.jpeg)
+
 ## 🔥 Update
 - [x] [2025.11.3] Added **Gradio demo** support.
 - [x] [2025.10.18] Added **Docker** support.
