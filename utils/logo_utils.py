@@ -378,17 +378,33 @@ class LogoManager:
 
             # Look for lines with ¹ (first affiliation marker) at the beginning
             if '¹' in line:
-                # Check if this line contains an institution
-                matches = re.findall(all_pattern, line, re.IGNORECASE)
-                if matches:
-                    for match_groups in matches:
-                        for inst in match_groups:
-                            if inst:
-                                first_institution = inst.strip()
-                                print(f"   🎯 Found first author institution (from affiliation marker): {first_institution}")
-                                break
-                        if first_institution:
-                            break
+                # Use finditer on each pattern individually to find all matches
+                # This avoids the issue where re.findall() with alternation only finds non-overlapping matches
+                all_matches = []
+                for pattern_idx, pattern in enumerate(institution_patterns):
+                    for match in re.finditer(pattern, line, re.IGNORECASE):
+                        matched_text = match.group()
+                        # Filter out very short matches (1-2 chars) but allow valid abbreviations (MIT, NYU, etc.)
+                        if matched_text and len(matched_text.strip()) >= 3:
+                            all_matches.append((match.start(), matched_text.strip(), pattern_idx))
+                
+                if all_matches:
+                    # Prioritize pattern 0 (University of X) over pattern 1 (X University)
+                    pattern0_matches = [m for m in all_matches if m[2] == 0]
+                    if pattern0_matches:
+                        first_institution = pattern0_matches[0][1]  # Take first pattern 0 match
+                        print(f"   🎯 Found first author institution (from affiliation marker): {first_institution}")
+                        break
+                    # If no pattern 0, use other patterns but filter out author names
+                    for start_pos, inst, pattern_idx in sorted(all_matches, key=lambda x: (x[2], x[0])):
+                        if pattern_idx == 1:  # This is the "X University" pattern
+                            # Skip if it looks like an author name (very short or contains common names)
+                            inst_lower = inst.lower()
+                            if len(inst.split()) <= 2 and any(name in inst_lower for name in ['chen', 'wang', 'li', 'zhang', 'smith', 'john']):
+                                continue
+                        first_institution = inst
+                        print(f"   🎯 Found first author institution (from affiliation marker): {first_institution}")
+                        break
             if first_institution:
                 break
 
@@ -408,16 +424,32 @@ class LogoManager:
                     # Extract content in parentheses
                     paren_content = re.findall(r'\((.*?)\)', line)
                     for content in paren_content:
-                        inst_matches = re.findall(all_pattern, content, re.IGNORECASE)
-                        if inst_matches:
-                            for match_groups in inst_matches:
-                                for inst in match_groups:
-                                    if inst:
-                                        first_institution = inst.strip()
-                                        print(f"   🎯 Found first author institution (from parentheses): {first_institution}")
-                                        break
-                                if first_institution:
-                                    break
+                        # Use finditer on each pattern individually to find all matches
+                        all_matches = []
+                        for pattern_idx, pattern in enumerate(institution_patterns):
+                            for match in re.finditer(pattern, content, re.IGNORECASE):
+                                matched_text = match.group()
+                                # Filter out very short matches (1-2 chars) but allow valid abbreviations (MIT, NYU, etc.)
+                                if matched_text and len(matched_text.strip()) >= 3:
+                                    all_matches.append((match.start(), matched_text.strip(), pattern_idx))
+                        
+                        if all_matches:
+                            # Prioritize pattern 0 (University of X) over pattern 1 (X University)
+                            pattern0_matches = [m for m in all_matches if m[2] == 0]
+                            if pattern0_matches:
+                                first_institution = pattern0_matches[0][1]  # Take first pattern 0 match
+                                print(f"   🎯 Found first author institution (from parentheses): {first_institution}")
+                                break
+                            # If no pattern 0, use other patterns but filter out author names
+                            for start_pos, inst, pattern_idx in sorted(all_matches, key=lambda x: (x[2], x[0])):
+                                if pattern_idx == 1:  # This is the "X University" pattern
+                                    # Skip if it looks like an author name (very short or contains common names)
+                                    inst_lower = inst.lower()
+                                    if len(inst.split()) <= 2 and any(name in inst_lower for name in ['chen', 'wang', 'li', 'zhang', 'smith', 'john']):
+                                        continue
+                                first_institution = inst
+                                print(f"   🎯 Found first author institution (from parentheses): {first_institution}")
+                                break
                         if first_institution:
                             break
                 if first_institution:
@@ -429,16 +461,35 @@ class LogoManager:
                 if 'abstract' in line.lower() or 'introduction' in line.lower():
                     break
 
-                matches = re.findall(all_pattern, line, re.IGNORECASE)
-                if matches:
-                    for match_groups in matches:
-                        for inst in match_groups:
-                            if inst:
-                                first_institution = inst.strip()
-                                print(f"   🎯 Found institution (general search): {first_institution}")
-                                break
-                        if first_institution:
-                            break
+                # Use finditer on each pattern individually to find all matches
+                # This avoids the issue where re.findall() with alternation only finds non-overlapping matches
+                all_matches = []
+                for pattern_idx, pattern in enumerate(institution_patterns):
+                    for match in re.finditer(pattern, line, re.IGNORECASE):
+                        matched_text = match.group()
+                        # Filter out very short matches (1-2 chars) but allow valid abbreviations (MIT, NYU, etc.)
+                        if matched_text and len(matched_text.strip()) >= 3:
+                            all_matches.append((match.start(), matched_text.strip(), pattern_idx))
+                
+                if all_matches:
+                    # Prioritize pattern 0 (University of X) over pattern 1 (X University)
+                    # First, try to find pattern 0 matches
+                    pattern0_matches = [m for m in all_matches if m[2] == 0]
+                    if pattern0_matches:
+                        first_institution = pattern0_matches[0][1]  # Take first pattern 0 match
+                        print(f"   🎯 Found institution (general search, pattern 0): {first_institution}")
+                        break
+                    
+                    # If no pattern 0, use other patterns but filter out author names
+                    for start_pos, inst, pattern_idx in sorted(all_matches, key=lambda x: (x[2], x[0])):
+                        if pattern_idx == 1:  # This is the "X University" pattern
+                            # Skip if it looks like an author name (very short or contains common names)
+                            inst_lower = inst.lower()
+                            if len(inst.split()) <= 2 and any(name in inst_lower for name in ['chen', 'wang', 'li', 'zhang', 'smith', 'john']):
+                                continue
+                        first_institution = inst
+                        print(f"   🎯 Found institution (general search, pattern {pattern_idx}): {first_institution}")
+                        break
                 if first_institution:
                     break
 
