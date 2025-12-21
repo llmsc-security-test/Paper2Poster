@@ -301,8 +301,8 @@ def filter_image_table(args, filter_config):
     response_json = get_json_from_response(response.msgs[0].content)
     table_information = response_json['table_information']
     image_information = response_json['image_information']
-    json.dump(images, open(f'<{args.model_name_t}_{args.model_name_v}>_images_and_tables/{args.poster_name}_images_filtered.json', 'w'), indent=4)
-    json.dump(tables, open(f'<{args.model_name_t}_{args.model_name_v}>_images_and_tables/{args.poster_name}_tables_filtered.json', 'w'), indent=4)
+    json.dump(image_information, open(f'<{args.model_name_t}_{args.model_name_v}>_images_and_tables/{args.poster_name}_images_filtered.json', 'w'), indent=4)
+    json.dump(table_information, open(f'<{args.model_name_t}_{args.model_name_v}>_images_and_tables/{args.poster_name}_tables_filtered.json', 'w'), indent=4)
 
     return input_token, output_token
 
