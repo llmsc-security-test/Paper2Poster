@@ -255,3 +255,22 @@ Please kindly cite our paper if you find this project helpful.
       url={https://arxiv.org/abs/2505.21497}, 
 }
 ```
+
+
+
+
+
+
+---
+
+## Docker Deployment
+
+This repository has been Dockerized for easy deployment.
+
+- **Official Repository**: [Paper2Poster/Paper2Poster](https://github.com/Paper2Poster/Paper2Poster)
+- **Dockerized by**: [llmsc-security](https://github.com/llmsc-security)
+- **Docker Image**: `Paper2Poster--Paper2Poster_image`
+- **Container**: `Paper2Poster--Paper2Poster_container`
+- **HTTP Service**: `http://127.0.0.1:11320`
+
+For Docker deployment and port mapping details, please visit our [Docker Directory](https://github.com/llmsc-security/docker-yuelin).
